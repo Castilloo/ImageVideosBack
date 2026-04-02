@@ -9,4 +9,5 @@ public interface IGalleryRepository
     Task<List<VideoDto>> GetVideosDefault(int page, int perPage);
     Task<List<PhotoDto>> GetPhotosByKeyword(string keyword);
     Task<List<VideoDto>> GetVideosByKeyword(string keyword);
+    Task<List<object>> GetPhotosAndVideos();
 }

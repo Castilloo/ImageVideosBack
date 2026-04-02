@@ -22,8 +22,8 @@ public class GalleryRepository : IGalleryRepository
     {
         try
         {
-            var result = (page == 0 && perPage == 0) ? 
-                await _client.CuratedPhotosAsync(1, 12) 
+            var result = (page == 0 && perPage == 0) ?
+                await _client.CuratedPhotosAsync(1, 12)
                 : await _client.CuratedPhotosAsync(page, perPage);
 
             return result?.photos?
@@ -44,8 +44,8 @@ public class GalleryRepository : IGalleryRepository
     {
         try
         {
-            var result = (page == 0 && perPage == 0) 
-                ? await _client.PopularVideosAsync(1, 12) 
+            var result = (page == 0 && perPage == 0)
+                ? await _client.PopularVideosAsync(1, 12)
                 : await _client.PopularVideosAsync(page, perPage);
             return result?.videos?
                 .Select(p => ToVideoDto(new PexelsVideoAdapter(p)))
@@ -53,7 +53,7 @@ public class GalleryRepository : IGalleryRepository
         }
         catch (HttpRequestException)
         {
-            throw; 
+            throw;
         }
         catch (TaskCanceledException)
         {
@@ -87,13 +87,46 @@ public class GalleryRepository : IGalleryRepository
         {
             var client = _http.CreateClient("Pexels");
             Console.WriteLine($"Realizando solicitud a: {client.BaseAddress}?query={keyword}");
-            var result = await client.GetFromJsonAsync<HttpPexelsResponse>($"?query={keyword}");
+            var result = await client.GetFromJsonAsync<HttpPexelsResponse>($"?query={keyword}?orientation=landscape&size=medium");
             // var result = await _client.SearchVideosAsync(keyword, "landscape", "medium");
             Console.WriteLine(result.Videos);
 
             return result?.Videos?
                 .Select(p => ToVideoDto(new HttpVideoAdapter(p)))
                 .ToList() ?? new List<VideoDto>();
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new Exception("Error de respuesta de la API", ex);
+        }
+        catch (TaskCanceledException ex)
+        {
+            throw new Exception("Tiempo de respuesta de API expiró", ex);
+        }
+    }
+
+    public async Task<List<object>> GetPhotosAndVideos()
+    {
+        const string keyword = "nature";
+        try
+        {
+            var photos = await GetPhotosByKeyword(keyword);
+            var videos = await GetVideosByKeyword(keyword);
+
+            var random = new Random();
+
+            photos = ListaRandom(photos);
+
+            videos = ListaRandom(videos);
+
+            var combined = new List<object>();
+            for (int i = 0; i < photos.Count; i++)
+            {
+                combined.Add(photos[i]);
+                combined.Add(videos[i]);
+            }
+
+            return combined;
         }
         catch (HttpRequestException ex)
         {
@@ -126,24 +159,34 @@ public class GalleryRepository : IGalleryRepository
     private static VideoDto ToVideoDto(IApiVideo apiVideo)
     {
         var file = apiVideo.VideoFiles?
-        .FirstOrDefault(v => v.Quality == "sd" && v.FileType == "video/mp4")
+        .FirstOrDefault(v => v.Quality == "hd" && v.FileType == "video/mp4")
         ?? apiVideo.VideoFiles?.FirstOrDefault();
 
         return new VideoDto
         {
             Id = apiVideo.Id,
             Image = apiVideo.Image,
-            Duration = (int) apiVideo.Duration,
+            Duration = (int)apiVideo.Duration,
             VideoFile = file == null ? new VideoFileDto() : new VideoFileDto
             {
                 Id = file.Id,
                 Quality = file.Quality,
                 FileType = file.FileType,
-                Width = (int) file.Width,
-                Height = (int) file.Height,
+                Width = (int)file.Width,
+                Height = (int)file.Height,
                 Fps = file.Fps,
                 Link = file.Link.AbsoluteUri,
             }
         };
+    }
+
+    private static List<V> ListaRandom<V>(List<V> lista)
+    {
+        var random = new Random();
+
+        return lista
+            .OrderBy(x => random.Next())
+            .Take(2)
+            .ToList();
     }
 }

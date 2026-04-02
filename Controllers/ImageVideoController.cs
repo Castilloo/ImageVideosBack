@@ -116,4 +116,28 @@ public class ImageVideoController : ControllerBase
             });
         }
     }
+
+    [HttpGet("photos-videos")]
+    [ProducesResponseType(typeof(List<dynamic>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<List<object>>> GetPhotosAndVideos()
+    {
+        try
+        {
+            var combined = await _repository.GetPhotosAndVideos();
+
+            if (!combined.Any()) return NoContent();
+
+            return Ok(combined);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = ex.Message
+            });
+        }
+    }
+
 }
