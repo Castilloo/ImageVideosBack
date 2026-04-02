@@ -65,7 +65,7 @@ public class GalleryRepository : IGalleryRepository
     {
         try
         {
-            var result = await _client.SearchPhotosAsync(keyword, "landscape", "medium");
+            var result = await _client.SearchPhotosAsync(keyword, "landscape", "medium", pageSize: 12);
 
             return result?.photos?
                 .Select(p => ToPhotoDto(p))
@@ -86,10 +86,8 @@ public class GalleryRepository : IGalleryRepository
         try
         {
             var client = _http.CreateClient("Pexels");
-            Console.WriteLine($"Realizando solicitud a: {client.BaseAddress}?query={keyword}");
-            var result = await client.GetFromJsonAsync<HttpPexelsResponse>($"?query={keyword}?orientation=landscape&size=medium");
+            var result = await client.GetFromJsonAsync<HttpPexelsResponse>($"?query={keyword}?orientation=landscape&size=medium&per_page=12");
             // var result = await _client.SearchVideosAsync(keyword, "landscape", "medium");
-            Console.WriteLine(result.Videos);
 
             return result?.Videos?
                 .Select(p => ToVideoDto(new HttpVideoAdapter(p)))
