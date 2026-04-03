@@ -40,7 +40,7 @@ public class AuthController : ControllerBase
 
         Response.Cookies.Append("jwt", jwt, new CookieOptions { HttpOnly = true });
 
-        return Ok(new { message = "success", token = jwt });
+        return Ok(new { message = "success", token = jwt, id = user.Id });
     }
 
     [HttpPost("register")]
@@ -73,6 +73,13 @@ public class AuthController : ControllerBase
         {
             return BadRequest("Error: " + ex);
         }
+    }
+
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("jwt");
+        return Ok(new { message = "logout success" });
     }
 
 }

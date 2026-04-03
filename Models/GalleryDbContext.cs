@@ -6,15 +6,44 @@ namespace img_video_app_back.Models;
 
 public partial class GalleryDbContext : DbContext
 {
+    public GalleryDbContext()
+    {
+    }
+
     public GalleryDbContext(DbContextOptions<GalleryDbContext> options)
         : base(options)
     {
     }
 
+    public virtual DbSet<Favorite> Favorites { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=127.0.0.1,1444;Database=GalleryDB;User Id=sa;Password=Contrasenamuysegura+123;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Favorite>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Favorite__3214EC072A952721");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ItemId).HasMaxLength(100);
+            entity.Property(e => e.Type).HasMaxLength(50);
+            entity.Property(e => e.Url)
+                .HasMaxLength(500)
+                .HasDefaultValue("");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Favorites)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Favorites_User");
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Users__3214EC076EF1F5E1");
