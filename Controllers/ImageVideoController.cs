@@ -1,10 +1,12 @@
 using img_video_app_back.Models;
 using img_video_app_back.Models.Dtos;
 using img_video_app_back.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace img_video_app_back.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ImageVideoController : ControllerBase
