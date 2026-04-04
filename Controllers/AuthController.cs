@@ -67,7 +67,7 @@ public class AuthController : ControllerBase
 
             var token = _jwt.Generate(newUser.Id);
 
-            return Created("", new { User = newUser, Token = token });
+            return Created("", new { UserId = newUser.Id, Token = token });
         }
         catch (Exception ex)
         {

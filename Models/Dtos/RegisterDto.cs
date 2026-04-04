@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace img_video_app_back.Models.Dtos
 {
     public class RegisterDto
